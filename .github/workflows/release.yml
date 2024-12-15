@@ -16,7 +16,7 @@ jobs:
     permissions:
       contents: write
     env:
-      APP_NAME: hello_world
+      APP_NAME: http_trace
     strategy:
       matrix:
         target:
