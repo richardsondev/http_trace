@@ -92,6 +92,10 @@ jobs:
         if: ${{ contains(matrix.target.rustTarget, 'i686-unknown-linux-gnu') }}
         run: sudo apt install -y gcc-multilib
 
+      - name: Install OpenSSL (Linux)
+        if: ${{ contains(matrix.target.rustTarget, 'linux') }}
+        run: sudo apt install -y libssl-dev pkg-config
+
       # Build time
       - name: Build
         run: cargo build --release --target ${{ matrix.target.rustTarget }}
