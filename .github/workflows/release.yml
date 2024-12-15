@@ -23,36 +23,44 @@ jobs:
           # Windows
           - { displayName: 32-bit Windows,
               rustTarget: i686-pc-windows-gnu,
+              testTarget: win-x86,
               runner: 'ubuntu-latest' }
 
           - { displayName: 64-bit Windows,
               rustTarget: x86_64-pc-windows-gnu,
+              testTarget: win-x64,
               runner: 'ubuntu-latest' }
 
           # Linux
           - { displayName: 32-bit Linux,
               rustTarget: i686-unknown-linux-gnu,
+              testTarget: linux-x86,
               runner: 'ubuntu-latest' }
 
           - { displayName: 64-bit Linux,
               rustTarget: x86_64-unknown-linux-gnu,
+              testTarget: linux-x64,
               runner: 'ubuntu-latest' }
 
           - { displayName: ARM32 ARMv6 Linux,
               rustTarget: arm-unknown-linux-gnueabi,
+              testTarget: linux-arm,
               runner: 'ubuntu-latest' }
 
           - { displayName: ARM32 ARMv7 Linux,
               rustTarget: armv7-unknown-linux-gnueabihf,
+              testTarget: linux-arm,
               runner: 'ubuntu-latest' }
 
           - { displayName: ARM64 Linux,
               rustTarget: aarch64-unknown-linux-gnu,
+              testTarget: linux-arm64,
               runner: 'ubuntu-latest' }
 
           # macOS
           - { displayName: 64-bit macOS,
               rustTarget: x86_64-apple-darwin,
+              testTarget: osx-x64,
               runner: 'macos-latest' }
 
     runs-on: ${{ matrix.target.runner }}
@@ -110,10 +118,10 @@ jobs:
         run: dotnet restore ./test/http_trace_server.csproj
 
       - name: Build HTTP Trace Server
-        run: dotnet publish ./test/http_trace_server.csproj -c Release -r ${{ matrix.target.rustTarget }} --self-contained -o ./publish/${{ matrix.target.rustTarget }}
+        run: dotnet publish ./test/http_trace_server.csproj -c Release -r ${{ matrix.target.testTarget }} --self-contained -o ./publish/${{ matrix.target.testTarget }}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
           name: http_trace_server (${{ matrix.target.displayName }})
-          path: ./publish/${{ matrix.target.rustTarget }}
+          path: ./publish/${{ matrix.target.testTarget }}
