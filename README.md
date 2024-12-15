@@ -1,51 +1,114 @@
-# Rust Application Template
+# http_trace
 
-This is a template project to build a Rust application using GitHub Actions and automatically publish release artifacts for Windows, Linux, and macOS.
+`http_trace` is a Rust application that sends HTTP TRACE requests to a specified URL. It validates the URL and returns the TRACE response, which can be useful for testing servers that support the HTTP TRACE method or for debugging request flows.
 
-## How to Use
+## What Does HTTP TRACE Return?
 
-1. **Create a new repository from this template.**
-    
-    On GitHub, click the "Use this template" button to create a new repository based on this template.
+When you send an HTTP TRACE request to a server that supports it, the server should return the exact request message it received, including all headers. This lets you see how intermediaries—such as proxies and load balancers—may have modified the request before it reached the server.
 
-2. **Clone your new repository.**
-    
-    Clone your newly created repository to your local machine and navigate to the root directory of the project.
+**Note:** Many servers and proxies disable or block TRACE for security reasons. If it is enabled, a typical response might look like the below example.
 
-3. **Run the project locally.**
+## Example Usage
 
-    You can run the project locally by using the following command in your terminal:
-    
-    ```bash
-    cargo run
-    ```
+### Running the Binary
+```bash
+http_trace.exe http://example.com/
+```
 
-    This command will compile your code and run the resulting executable.
+### Example Response
+```
+HTTP/1.1 200 OK
+Date: Sat, 14 Dec 2024 12:00:00 GMT
+Server: Apache/2.4.41 (Ubuntu)
+Content-Type: message/http
+Content-Length: 162
 
-4. **Commit and push changes.**
-    
-    After making changes, commit and push to your repository. GitHub Actions will automatically start the build process.
+TRACE / HTTP/1.1
+Host: example.com
+Accept: */*
+```
 
-## GitHub Actions
+In this example, the server responds with `200 OK` and echoes the request line and headers it received. The application exits with code 0.
 
-This project uses GitHub Actions for continuous integration. Upon each push to your repository or release creation, the workflow will:
+## Getting Started
 
-- Check out the latest code.
-- Set up the necessary Rust environment.
-- Build and test the project.
-- Create release artifacts for Windows, Linux, and macOS. (Only on release creation events)
+### Prebuilt Binaries
 
-The artifacts will then be available for download from the "Actions" tab on your repository and also from the "Releases" tab for release events.
+You can download prebuilt binaries for various platforms from the [Releases](https://github.com/richardsondev/http_trace/releases) page. Select the binary that matches your operating system and architecture, then place it in your desired directory.
 
-## Docker image
+### Building from Source
 
-This project also contains `buildpush.sh` which will build a distroless Docker image with the application as the entry point. By default, the 
-script will push the built multi-arch images to DockerHub. [Here](https://hub.docker.com/r/richardsondev/hello_world/tags) is an example of 
-what it would look like.
+If you prefer to build the application from source, you will need Rust and Cargo installed.
+
+```bash
+git clone https://github.com/richardsondev/http_trace.git
+cd http_trace
+cargo build --release
+```
+
+This creates an optimized binary in the `target/release` directory.
+
+### Running the Application
+
+If you are using a downloaded binary, ensure it is executable and run:
+
+```bash
+./http_trace <url>
+```
+
+If you built from source, you can run the optimized binary:
+
+```bash
+./target/release/http_trace <url>
+```
+
+Replace `<url>` with the URL you want to send the TRACE request to.
+
+**Important:** If no URL is provided, or if the URL is invalid, the program will exit with an error message and a nonzero code.
+
+### Exit Codes
+
+- **0**: The TRACE request succeeded.
+- **1**: The TRACE request failed, the URL was invalid, or no URL was provided.
+
+## Local Testing with the C# Test Server
+
+A simple C# application is provided in the `test` directory to help with local development and integration testing. This application hosts a local HTTP server on `http://localhost:8080` that supports the TRACE method. You can use it to test `http_trace` locally without relying on an external server.
+
+### Setting Up the Test Server
+
+1. Navigate to the `test` folder:
+   ```bash
+   cd test
+   ```
+
+2. Build the C# test server. You will need the .NET SDK installed. For example:
+   ```bash
+   dotnet build
+   ```
+
+3. Run the server:
+   ```bash
+   dotnet run
+   ```
+   
+   The server will start listening on `http://localhost:8080`.
+
+Alternatively, you can download a prebuilt version of the test server from the latest GitHub Actions build if one is available.
+
+### Testing Against the Local Server
+
+With the C# server running locally, you can now run `http_trace` against `http://localhost:8080`:
+
+```bash
+./target/release/http_trace http://localhost:8080
+```
+
+You should see the TRACE request and response echoed back from the local server, allowing you to verify that the application functions as expected.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Feel free to submit a pull request. For major changes, consider opening an issue first to discuss what you would like to modify.
 
 ## License
 

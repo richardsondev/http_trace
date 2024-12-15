@@ -92,3 +92,12 @@ Temporary Items
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]
 *.un~
+
+# C#
+**/obj/**
+**/objd/**
+**/.vs/**
+**.deps.json
+**.runtimeconfig.json
+**.csproj.user
+**/PublishProfiles/**
