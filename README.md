@@ -38,16 +38,11 @@ You can download prebuilt binaries for various platforms from the [Releases](htt
 
 ### Building from Source
 
-If you prefer to build the application from source, you will need Rust and Cargo installed. First, clone the repository and navigate to its root directory:
+If you prefer to build the application from source, you will need Rust and Cargo installed.
 
 ```bash
 git clone https://github.com/richardsondev/http_trace.git
 cd http_trace
-```
-
-Then, build the application:
-
-```bash
 cargo build --release
 ```
 
@@ -75,6 +70,41 @@ Replace `<url>` with the URL you want to send the TRACE request to.
 
 - **0**: The TRACE request succeeded.
 - **1**: The TRACE request failed, the URL was invalid, or no URL was provided.
+
+## Local Testing with the C# Test Server
+
+A simple C# application is provided in the `test` directory to help with local development and integration testing. This application hosts a local HTTP server on `http://localhost:8080` that supports the TRACE method. You can use it to test `http_trace` locally without relying on an external server.
+
+### Setting Up the Test Server
+
+1. Navigate to the `test` folder:
+   ```bash
+   cd test
+   ```
+
+2. Build the C# test server. You will need the .NET SDK installed. For example:
+   ```bash
+   dotnet build
+   ```
+
+3. Run the server:
+   ```bash
+   dotnet run
+   ```
+   
+   The server will start listening on `http://localhost:8080`.
+
+Alternatively, you can download a prebuilt version of the test server from the latest GitHub Actions build if one is available.
+
+### Testing Against the Local Server
+
+With the C# server running locally, you can now run `http_trace` against `http://localhost:8080`:
+
+```bash
+./target/release/http_trace http://localhost:8080
+```
+
+You should see the TRACE request and response echoed back from the local server, allowing you to verify that the application functions as expected.
 
 ## Contributing
 

@@ -1,5 +1,5 @@
 use std::{env, process};
-use reqwest::Client;
+use reqwest::{Client, Response};
 use url::Url;
 
 #[tokio::main]
@@ -23,8 +23,8 @@ async fn main() {
 
     // Perform the TRACE request
     match perform_trace(url).await {
-        Ok(_) => {
-            println!("TRACE request to '{}' succeeded.", url);
+        Ok(response) => {
+            println!("{}", response);
             process::exit(0);
         }
         Err(e) => {
@@ -34,21 +34,53 @@ async fn main() {
     }
 }
 
-async fn perform_trace(url: &str) -> Result<(), reqwest::Error> {
+async fn perform_trace(url: &str) -> Result<String, String> {
     let client = Client::new();
 
     // Perform the TRACE request
     let response = client
         .request(reqwest::Method::TRACE, url)
         .send()
-        .await?;
+        .await
+        .map_err(|e| format!("Failed to send TRACE request: {}", e))?;
 
     // Ensure the response was successful
     if response.status().is_success() {
-        Ok(())
+        format_trace_response(response).await
     } else {
-        Err(reqwest::Error::new(
-            reqwest::StatusCode::from_u16(response.status().as_u16()).unwrap(),
+        Err(format!(
+            "Received non-success status code: {}",
+            response.status()
         ))
     }
+}
+
+async fn format_trace_response(response: Response) -> Result<String, String> {
+    let version = match response.version() {
+        reqwest::Version::HTTP_09 => "0.9",
+        reqwest::Version::HTTP_10 => "1.0",
+        reqwest::Version::HTTP_11 => "1.1",
+        reqwest::Version::HTTP_2 => "2",
+        reqwest::Version::HTTP_3 => "3",
+        _ => "Unknown",
+    };
+
+    let status_line = format!("HTTP/{} {} {}", 
+        version, 
+        response.status().as_u16(), 
+        response.status().canonical_reason().unwrap_or(""));
+
+    let headers = response
+        .headers()
+        .iter()
+        .map(|(key, value)| format!("{}: {}", key, value.to_str().unwrap_or("<invalid UTF-8>")))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let body = response
+        .text()
+        .await
+        .map_err(|e| format!("Failed to read response body: {}", e))?;
+
+    Ok(format!("{}\n{}\n\n{}", status_line, headers, body))
 }

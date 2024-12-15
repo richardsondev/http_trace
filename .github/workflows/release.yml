@@ -103,24 +103,17 @@ jobs:
           cp ./target/${{ matrix.target.rustTarget }}/release/${{ env.APP_NAME }}${{ endsWith(matrix.target.rustTarget, '-windows-gnu') && '.exe' || '' }} ./${{ env.APP_NAME }}-${{ github.ref_name }}-${{ matrix.target.rustTarget }}${{ endsWith(matrix.target.rustTarget, '-windows-gnu') && '.exe' || '' }} &&
           gh release upload ${{ github.event.release.tag_name }} ./${{ env.APP_NAME }}-${{ github.ref_name }}-${{ matrix.target.rustTarget }}${{ endsWith(matrix.target.rustTarget, '-windows-gnu') && '.exe' || '' }}#"${{ env.APP_NAME }}-${{ github.ref_name }}-${{ matrix.target.rustTarget }}${{ endsWith(matrix.target.rustTarget, '-windows-gnu') && '.exe' || '' }} (${{ matrix.target.displayName }})"
 
-  build-local-test:
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
 
-      - name: Build HTTP Trace Server
-        working-directory: ./test
-        run: |
-          dotnet restore
-          dotnet build --configuration Release
+      - name: Restore HTTP Trace Server
+        run: dotnet restore ./test/http_trace_server.csproj
 
-      - name: Upload Asset
+      - name: Build HTTP Trace Server
+        run: dotnet publish ./test/http_trace_server.csproj -c Release -r ${{ matrix.target.rustTarget }} --self-contained -o ./publish/${{ matrix.target.rustTarget }}
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: http_trace_server
-          path: ./test/bin/Release/
+          name: http_trace_server (${{ matrix.target.displayName }})
+          path: ./publish/${{ matrix.target.rustTarget }}
