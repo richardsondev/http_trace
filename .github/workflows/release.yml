@@ -126,5 +126,5 @@ jobs:
         if: ${{ matrix.target.testTarget != '' }}
         uses: actions/upload-artifact@v3
         with:
-          name: http_trace_server (${{ matrix.target.displayName }})
+          name: http_trace_server-${{ matrix.target.testTarget }}
           path: ./publish/${{ matrix.target.testTarget }}
