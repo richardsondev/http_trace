@@ -34,7 +34,7 @@ jobs:
           # Linux
           - { displayName: 32-bit Linux,
               rustTarget: i686-unknown-linux-gnu,
-              testTarget: linux-x86,
+              testTarget: '',
               runner: 'ubuntu-latest' }
 
           - { displayName: 64-bit Linux,
@@ -119,12 +119,15 @@ jobs:
         uses: actions/setup-dotnet@v3
 
       - name: Restore HTTP Trace Server
+        if: ${{ matrix.target.testTarget != '' }}
         run: dotnet restore ./test/http_trace_server.csproj
 
       - name: Build HTTP Trace Server
+        if: ${{ matrix.target.testTarget != '' }}
         run: dotnet publish ./test/http_trace_server.csproj -c Release -r ${{ matrix.target.testTarget }} --self-contained -o ./publish/${{ matrix.target.testTarget }}
 
-      - name: Upload Artifact
+      - name: Upload Test Artifact
+        if: ${{ matrix.target.testTarget != '' }}
         uses: actions/upload-artifact@v3
         with:
           name: http_trace_server (${{ matrix.target.displayName }})
