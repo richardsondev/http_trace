@@ -68,6 +68,12 @@ jobs:
       # Get the machine ready to build
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Update apt-get package list
+        if: ${{ contains(matrix.target.runner, 'ubuntu') }}
+        run: sudo apt-get update
 
       - name: Add Rust Target
         run: rustup target add ${{ matrix.target.rustTarget }}
@@ -124,7 +130,7 @@ jobs:
 
       - name: Upload Test Artifact
         if: ${{ matrix.target.testTarget != '' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: http_trace_server-${{ matrix.target.testTarget }}
+          name: http_trace_server-${{ matrix.target.testTarget }}-${{ matrix.target.rustTarget }}
           path: ./publish/${{ matrix.target.testTarget }}
