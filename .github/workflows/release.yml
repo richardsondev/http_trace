@@ -93,7 +93,7 @@ jobs:
 
       - name: Add Windows Build Dependencies
         if: ${{ contains(matrix.target.rustTarget, 'pc-windows') }}
-        run: sudo apt install -y gcc-mingw-w64
+        run: sudo apt install -y gcc-mingw-w64 nasm
 
       - name: Add ARM32 Build Dependencies
         if: ${{ contains(matrix.target.rustTarget, 'arm') }}
@@ -170,3 +170,4 @@ jobs:
           VERSION="${{ github.ref_name }}"
           VERSION="${VERSION#v}"
           gh release upload ${{ github.event.release.tag_name }} --clobber ./${{ env.APP_NAME }}_${VERSION}_${{ matrix.target.debArch }}.deb
+
